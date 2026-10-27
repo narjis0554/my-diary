@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>우리 다이어리</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <h1 class="logo">📒 우리 다이어리</h1>
+      <nav id="tabs" class="tabs" hidden>
+        <button type="button" class="tab active" data-tab="calendar">📅 캘린더</button>
+        <button type="button" class="tab" data-tab="diary">📔 다이어리</button>
+      </nav>
+      <div id="user" class="user" hidden>
+        <img id="user-pic" alt="" referrerpolicy="no-referrer">
+        <span id="user-name"></span>
+        <button type="button" id="logout" class="btn-ghost">로그아웃</button>
+      </div>
+    </header>
+
+    <!-- 로그인 전 -->
+    <section id="gate" class="gate" hidden>
+      <h2>함께 쓰는 캘린더 &amp; 다이어리</h2>
+      <p>일정과 하루 기록을 적고, 공개한 것은 서로 볼 수 있어요.</p>
+      <button type="button" id="login" class="btn-google">
+        <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.9 6.1C12.5 13.6 17.8 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.7c4.3-4 6.9-9.9 6.9-17.1z"/><path fill="#FBBC05" d="M10.6 28.6A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.6l-7.9-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.7 10.7l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.7c-2.1 1.4-4.8 2.2-8.5 2.2-6.2 0-11.5-4.1-13.4-9.9l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg>
+        Google 계정으로 로그인
+      </button>
+      <p id="gate-note" class="note" hidden></p>
+    </section>
+
+    <!-- 📅 캘린더 -->
+    <section id="calendar" class="view" hidden>
+      <div class="cal-layout">
+        <div class="panel">
+          <div class="cal-head">
+            <button type="button" id="prev-month" class="btn-icon" aria-label="이전 달">◀</button>
+            <h2 id="month-title"></h2>
+            <button type="button" id="next-month" class="btn-icon" aria-label="다음 달">▶</button>
+            <button type="button" id="this-month" class="btn-ghost">오늘</button>
+          </div>
+          <div id="people" class="people"></div>
+          <div class="weekdays">
+            <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+          </div>
+          <div id="month-grid" class="month-grid"></div>
+        </div>
+
+        <aside class="panel day-panel">
+          <div class="day-head">
+            <h3 id="day-title"></h3>
+            <button type="button" id="add-event" class="btn-primary">+ 일정</button>
+          </div>
+          <ul id="day-events" class="event-list"></ul>
+        </aside>
+      </div>
+    </section>
+
+    <!-- 📔 다이어리 -->
+    <section id="diary" class="view" hidden>
+      <div class="diary-head">
+        <button type="button" id="prev-day" class="btn-icon" aria-label="이전 날">◀</button>
+        <h2 id="diary-title"></h2>
+        <button type="button" id="next-day" class="btn-icon" aria-label="다음 날">▶</button>
+        <button type="button" id="today" class="btn-ghost">오늘</button>
+      </div>
+
+      <form id="diary-form" class="panel diary-form">
+        <h3>🍽️ 먹은 것</h3>
+        <div class="meals">
+          <label>아침<input name="breakfast" maxlength="200" placeholder="예: 토스트, 커피"></label>
+          <label>점심<input name="lunch" maxlength="200"></label>
+          <label>저녁<input name="dinner" maxlength="200"></label>
+          <label>간식<input name="snack" maxlength="200"></label>
+        </div>
+
+        <div class="row-2">
+          <div>
+            <h3>💧 물</h3>
+            <div class="water">
+              <button type="button" id="water-minus" class="btn-icon" aria-label="물 500ml 빼기">−</button>
+              <output id="water-count">0</output><span>ml</span>
+              <button type="button" id="water-plus" class="btn-icon" aria-label="물 500ml 더하기">+</button>
+            </div>
+            <div id="water-cups" class="cups" aria-hidden="true"></div>
+          </div>
+          <div>
+            <h3>🏃 운동</h3>
+            <div class="exercise">
+              <input name="exercise" maxlength="100" placeholder="예: 걷기">
+              <label class="min"><input name="exercise_min" type="number" min="0" max="1440" inputmode="numeric" placeholder="0">분</label>
+            </div>
+          </div>
+        </div>
+
+        <h3>😀 오늘 기분</h3>
+        <div id="moods" class="moods" role="radiogroup" aria-label="오늘 기분">
+          <button type="button" data-mood="😄" aria-label="아주 좋음">😄</button>
+          <button type="button" data-mood="🙂" aria-label="좋음">🙂</button>
+          <button type="button" data-mood="😐" aria-label="보통">😐</button>
+          <button type="button" data-mood="😢" aria-label="슬픔">😢</button>
+          <button type="button" data-mood="😡" aria-label="화남">😡</button>
+        </div>
+
+        <h3>✏️ 오늘 한 줄</h3>
+        <textarea name="note" rows="2" maxlength="1000" placeholder="오늘 하루는 어땠나요?"></textarea>
+
+        <div class="form-foot">
+          <div class="visibility" role="radiogroup" aria-label="공개 범위">
+            <label><input type="radio" name="d_public" value="false" checked> 🔒 나만 보기</label>
+            <label><input type="radio" name="d_public" value="true"> 🌐 공개</label>
+          </div>
+          <button type="submit" class="btn-primary">저장</button>
+        </div>
+      </form>
+
+      <h3 class="others-title">👥 다른 사람들의 공개 기록</h3>
+      <div id="others" class="others"></div>
+    </section>
+
+    <footer>Supabase · Vercel 로 만든 실습 프로젝트</footer>
+  </div>
+
+  <!-- 일정 추가/수정 창 -->
+  <dialog id="event-dialog">
+    <form id="event-form" method="dialog">
+      <h3 id="event-dialog-title">일정 추가</h3>
+      <label>제목<input name="title" required maxlength="100"></label>
+      <label>날짜<input name="date" type="date" required></label>
+      <label class="check"><input name="all_day" type="checkbox" checked> 종일</label>
+      <div class="times">
+        <label>시작<input name="start_time" type="time"></label>
+        <label>끝<input name="end_time" type="time"></label>
+      </div>
+      <label>메모<textarea name="memo" rows="3" maxlength="1000"></textarea></label>
+      <div class="visibility" role="radiogroup" aria-label="공개 범위">
+        <label><input type="radio" name="e_public" value="false" checked> 🔒 나만 보기</label>
+        <label><input type="radio" name="e_public" value="true"> 🌐 공개</label>
+      </div>
+      <div class="dialog-foot">
+        <button type="button" id="delete-event" class="btn-danger" hidden>삭제</button>
+        <span class="spacer"></span>
+        <button type="button" id="cancel-event" class="btn-ghost">취소</button>
+        <button type="submit" class="btn-primary">저장</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
